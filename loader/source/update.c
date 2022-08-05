@@ -80,13 +80,14 @@ static int UnzipFile(const char *dir, bool useDefaultDrive, DOWNLOADS download_n
 	}
 	gprintf("%s opened\n", Downloads[download_number].filename);
 
+	// TODO: implement new check for this
 	// Use the default drive or the active drive?
-	if (useDefaultDrive) {
+//	if (useDefaultDrive) {
 		changeToDefaultDrive();
-	} else {
+//	} else {
 		// Use the active drive.
-		f_chdrive_char(UseSD ? "sd:" : "usb:");
-	}
+//		f_chdrive_char(UseSD ? "sd:" : "usb:");
+//	}
 
 	f_mkdir_char(dir); // attempt to make dir
 	if (f_chdir_char(dir) != FR_OK) {

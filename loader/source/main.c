@@ -825,7 +825,13 @@ int main(int argc, char **argv)
 		}
 	}
 	ReconfigVideo(rmode);
-	UseSD = (ncfg->Config & NIN_CFG_USB) == 0;
+	// determine the cfg backend storage mode
+	if (ncfg->Config & NIN_CFG_USB)
+		SourceDevice = DEV_USBMASS;
+	else if (ncfg->Config & NIN_CFG_SMB)
+		SourceDevice = DEV_SMBSHARE;
+	else
+		SourceDevice = DEV_SDCARD;
 
 	bool progressive = (CONF_GetProgressiveScan() > 0) && VIDEO_HaveComponentCable();
 	if(progressive) //important to prevent blackscreens

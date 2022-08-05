@@ -79,7 +79,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ALIGN_BACKWARD(x, align) \
 	((typeof(x))((x) & (~((typeof(x))(align) - 1))))
 
-extern bool UseSD;
+typedef enum {
+    // an SD card
+    DEV_SDCARD = 0,
+    // a USB mass storage device
+    DEV_USBMASS = 1,
+    // an SMB share
+    DEV_SMBSHARE = 2,
+} SourceDeviceType;
+extern u8 SourceDevice;
+
 extern u32 POffset;
 extern NIN_CFG *ncfg;
 extern FILE *cfg;

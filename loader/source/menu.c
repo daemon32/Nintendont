@@ -1708,7 +1708,7 @@ static int SelectGame(void)
 			// The list won't be shown, since a storage device
 			// is required for various functionality, but the
 			// user will be able to go back to the previous menu.
-			const char *s_devType = (UseSD ? "SD" : "USB");
+			const char *s_devType = "<placeholder>";
 			gprintf("No %s FAT device found.\n", s_devType);
 			break;
 		}
@@ -1882,13 +1882,12 @@ bool SelectDevAndGame(void)
 
 		if (redraw)
 		{
-			UseSD = (ncfg->Config & NIN_CFG_USB) == 0;
 			PrintInfo();
 			PrintButtonActions("Exit", "Select", NULL, NULL);
-			PrintFormat(DEFAULT_SIZE, BLACK, MENU_POS_X + 53 * 6 - 8, MENU_POS_Y + 20 * 6, UseSD ? ARROW_LEFT : "");
-			PrintFormat(DEFAULT_SIZE, BLACK, MENU_POS_X + 53 * 6 - 8, MENU_POS_Y + 20 * 7, UseSD ? "" : ARROW_LEFT);
+			PrintFormat(DEFAULT_SIZE, BLACK, MENU_POS_X + 53 * 6 - 8, MENU_POS_Y + 20 * (6 + SourceDevice), ARROW_LEFT); // horrendous hack
 			PrintFormat(DEFAULT_SIZE, BLACK, MENU_POS_X + 47 * 6 - 8, MENU_POS_Y + 20 * 6, " SD  ");
 			PrintFormat(DEFAULT_SIZE, BLACK, MENU_POS_X + 47 * 6 - 8, MENU_POS_Y + 20 * 7, "USB  ");
+			PrintFormat(DEFAULT_SIZE, BLACK, MENU_POS_X + 47 * 6 - 8, MENU_POS_Y + 20 * 8, "SMB  ");
 			redraw = false;
 
 			// Render the screen here to prevent a blank frame
@@ -1911,13 +1910,41 @@ bool SelectDevAndGame(void)
 		}
 		else if (FPAD_Down(0))
 		{
-			ncfg->Config = ncfg->Config | NIN_CFG_USB;
 			redraw = true;
+			if (SourceDevice == DEV_SMBSHARE)
+				continue;
+
+			SourceDevice++;
+
+			switch (SourceDevice)
+			{
+				case DEV_USBMASS:
+					ncfg->Config = ncfg->Config | NIN_CFG_USB;
+					break;
+				case DEV_SMBSHARE:
+					ncfg->Config = ncfg->Config & ~NIN_CFG_USB;
+					ncfg->Config = ncfg->Config | NIN_CFG_SMB;
+					break;
+			}
 		}
 		else if (FPAD_Up(0))
 		{
-			ncfg->Config = ncfg->Config & ~NIN_CFG_USB;
 			redraw = true;
+			if (SourceDevice == DEV_SDCARD)
+				continue;
+
+			SourceDevice--;
+
+			switch (SourceDevice)
+			{
+				case DEV_USBMASS:
+					ncfg->Config = ncfg->Config & ~NIN_CFG_SMB;
+					ncfg->Config = ncfg->Config | NIN_CFG_USB;
+					break;
+				case DEV_SDCARD:
+					ncfg->Config = ncfg->Config & ~NIN_CFG_USB;
+					break;
+			}
 		}
 	}
 
@@ -2009,7 +2036,19 @@ void PrintButtonActions(const char *btn_home, const char *btn_a, const char *btn
 static void PrintDevInfo(void)
 {
 	// Device type.
-	const char *s_devType = (UseSD ? "SD" : "USB");
+/*	switch (SourceDevice)
+	{
+		case DEV_SDCARD:
+			const char *s_devType = "SD";
+			break;
+		case DEV_USBMASS:
+			const char *s_devType = "USB";
+			break;
+		case DEV_SMBSHARE:
+			const char *s_devType = "SMB";
+			break;
+	}*/
+	const char *s_devType = "<placeholder>";
 
 	// Device state.
 	// NOTE: If this is showing a message, the game list

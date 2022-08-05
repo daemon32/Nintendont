@@ -55,16 +55,22 @@ static int bg_xPos = 0;
 u32 POffset;
 
 NIN_CFG* ncfg = (NIN_CFG*)0x93004000;
-bool UseSD;
+u8 SourceDevice;
 
 const char* const GetRootDevice()
 {
 	static const char* const SdStr = "sd";
 	static const char* const UsbStr = "usb";
-	if (UseSD)
-		return SdStr;
-	else
-		return UsbStr;
+	static const char* const SmbStr = "smb";
+	switch (SourceDevice)
+	{
+		case DEV_SDCARD:
+			return SdStr;
+		case DEV_USBMASS:
+			return UsbStr;
+		case DEV_SMBSHARE:
+			return SmbStr;
+	}
 }
 void RAMInit(void)
 {
